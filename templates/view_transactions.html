@@ -171,17 +171,17 @@ function flatten(root) {
 }
 function sizing(d){
   if(d.amount>100 && d.amount<2000){
-	console.log((d.amount-100)/40+40);
-    return (d.amount-100)/40+40;
+	console.log((d.amount-100)/20+40);
+    return (d.amount-100)*20/1900+40;
+  }else if(d.size>=2000){
+	console.log(60);
+    return 60;
   }
-  else if(d.size>=2000){
-	console.log(80);
-    return 80;
-  }
-  else {
+  else{
 	console.log(40);
     return 40;
   }
+  
 }
 
 
