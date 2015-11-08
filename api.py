@@ -6,9 +6,18 @@ import json
 
 apiKey = '6af9b1f2823897f75471935f92d95058'
 
-from flask import Flask, render_template
+from flask import Flask, render_template, url_for
 app = Flask(__name__)
 
+@app.route("/html")
+def show_html():
+  return render_template('index.html')
+
+@app.route("/top10data")
+def top10data():
+  data = {"name": "Purchases", "page": "#", "children": []}
+  return render_template('index.html')
+  
 @app.route("/")
 def pick_customer():
   return render_template('pick_customer.html', customers=getAllCustomers())
@@ -29,8 +38,99 @@ def view_transactions(account_id):
   print(account_id)
   if None:
     return "invalid customer_id"
-  return render_template('view_transactions.html', transactions=getAllTransactionsForAccount(account_id), purchaseTotal=getPurchaseTotal(account_id), depositTotal=getDepositTotal(account_id), transferTotal=getTransferTotal(account_id), withdrawal=getWithdrawalTotal(account_id))
+  return render_template('view_transactions.html', transactions=getAllTransactionsForAccount(account_id), account_id=account_id)
+  
+@app.route("/accountJSON/<account_id>")
+def account_json(account_id):
+  data = {
+      "name": "Welcome, " + getCustomerNameByAccount(account_id) + "!", "page": "#", "x": 500, "y": 250, 
+      "children": [
+      {"name": "Purchases", "size":50000, "x": 500, "y":590, "page": url_for('purchases_page', account_id=account_id)},
+      {"name": "Transfers", "size": 200,"x": 900, "y":325, "page": url_for('transfers_page', account_id=account_id)},
+      {"name": "Withdrawals", "size": 1000,"x": 500, "y":130, "page": url_for('withdrawals_page', account_id=account_id)},
+      {"name": "Deposits", "size": 200, "x": 100, "y":325, "page": url_for('deposits_page', account_id=account_id)}
+      ]
+      }
+      #transactions=getAllTransactionsForAccount(account_id), purchaseTotal=getPurchaseTotal(account_id), depositTotal=getDepositTotal(account_id), transferTotal=getTransferTotal(account_id), withdrawal=getWithdrawalTotal(account_id)
+  return json.dumps(data)
+@app.route("/purchasesTop10JSON/<account_id>")
+def purchases_json(account_id):
+  purchases = {}
+  for i in getAllPurchases(account_id):
+    if i["merchant_id"] in purchases:
+      purchases[i["merchant_id"]] += i["amount"]
+    else:
+      purchases[i["merchant_id"]] = i["amount"]
+  top_purchases = []
+  for i in purchases:
+    top_purchases.append([i, purchases[i]])
+  sorted(top_purchases, key=lambda purchase: purchase[1], reverse=True)
+  
+  total = 0
+  for i in top_purchases[10:]:
+    total += i[1]
+  if total != 0:
+    top_purchases = top_purchases[:10]
+    top_purchases.append(['Other', total])
+  for i in range(len(top_purchases)):
+    if top_purchases[i][0] == 'Other':
+      break
+    else:
+      top_purchases[i].append(top_purchases[i][0])
+      top_purchases[i][0] = getMerchantName(top_purchases[i][0])
+     
+  data = {"name": "Purchases", "page": "#", "children": []}
+  for i in top_purchases:
+    if i[0] != 'Other':
+      print(i)
+      data["children"].append({"name": i[0], "size":30000, "page":url_for('specific_purchases_page', account_id=account_id, merchant_id=i[2])})
+  print(data)
+  return json.dumps(data)
 
+@app.route("/transfersTop10JSON/<account_id>")
+def transfers_json(account_id):
+  transfers = {}
+  
+  for i in getAllTransfers(account_id):
+    other_id = ""
+    amount = 0
+    
+    if i["payer_id"] == account_id:
+      amount = -i["amount"]
+      other_id = getCustomerIdByAccount(i["payee_id"])
+    else:
+      amount = i["amount"]
+      other_id = getCustomerIdByAccount(i["payer_id"])
+      
+    if other_id in transfers:
+      transfers[other_id] += amount
+    else:
+      transfers[other_id] = amount
+      
+  top_transfers = []
+  for i in transfers:
+    top_transfers.append([i, transfers[i]])
+  sorted(top_transfers, key=lambda purchase: purchase[1], reverse=True)
+  
+  total = 0
+  for i in top_transfers[10:]:
+    total += i[1]
+  if total != 0:
+    top_transfers = top_transfers[:10]
+    top_transfers.append(['Other', total])
+  for i in range(len(top_transfers)):
+    if top_transfers[i][0] == 'Other':
+      break
+    else:
+      top_transfers[i].append(top_transfers[i][0])
+      top_transfers[i][0] = getCustomerName(top_transfers[i][0])
+  data = {"name": "Transfers", "page": "#", "children": []}
+  for i in top_transfers:
+    if i[0] != 'Other':
+      print(i)
+      data["children"].append({"name": i[0], "size":30000, "page":url_for('specific_transfers_page', account_id=account_id, customer_id=i[2])})
+  return json.dumps(data)  
+  
 @app.route("/account/<account_id>/purchases")
 def purchases_page(account_id):
   purchases = {}
@@ -54,8 +154,9 @@ def purchases_page(account_id):
     if top_purchases[i][0] == 'Other':
       break
     else:
+      top_purchases[i].append(top_purchases[i][0])
       top_purchases[i][0] = getMerchantName(top_purchases[i][0])
-  return render_template('top10.html', top = top_purchases, typeOfTransaction="Purchases")
+  return render_template('top10.html', top = top_purchases, typeOfTransaction="Purchases", account_id=account_id)
 
 @app.route("/account/<account_id>/withdrawals")
 def withdrawals_page(account_id):
@@ -76,9 +177,11 @@ def specific_transfers_page(account_id, customer_id): #actually
     if j == account_id:
       continue
     for i in getAllTransfers(account_id):
-      if j == i["payer_id"] or j == i["payee_id"]:
-        transfers.append(i)
-  sorted(transfers, key=lambda transfer: transfer["transaction_date"],reverse=True)
+      if j == i["payer_id"]:
+        transfers.append([i, False])
+      if j == i["payee_id"]:
+        transfers.append([i, True])
+  sorted(transfers, key=lambda transfer: transfer[0]["transaction_date"],reverse=True)
   return render_template('timeline.html', timeline_nodes = transfers, typeOfTransaction="Transfers with " + getCustomerName(customer_id))
 
 @app.route("/account/<account_id>/purchases/<merchant_id>")
@@ -126,7 +229,7 @@ def transfers_page(account_id):
       break
     else:
       top_transfers[i][0] = getCustomerName(top_transfers[i][0])
-  return render_template('top10.html', top = top_transfers, typeOfTransaction="Transfers")
+  return render_template('top10.html', top = top_transfers, typeOfTransaction="Transfers", account_id=account_id)
 
 @app.route("/makeDeposit/<accountId>/<amt>")
 def make_deposit(accountId, amt):
@@ -135,7 +238,7 @@ def make_deposit(accountId, amt):
     "medium": "balance",
     "transaction_date": "Sat, 07 Nov 2015 23:42:57 GMT",
     "status": "pending",
-    "amount": int(amt),
+    "amount": float(amt),
     "description": "deposit"
   }
   # Create a Savings Account
@@ -157,7 +260,7 @@ def make_withdrawal(accountId, amt):
     "medium": "balance",
     "transaction_date": "Sat, 07 Nov 2015 23:42:57 GMT",
     "status": "pending",
-    "amount": int(amt),
+    "amount": float(amt),
     "description": "withdrawal"
   }
   # Create a Savings Account
@@ -178,7 +281,7 @@ def transfer(accountId1, accountId2, amt):
   payload = {
     "medium": "balance",
     "payee_id": accountId2,
-    "amount": int(amt),
+    "amount": float(amt),
     "transaction_date": "Sat, 07 Nov 2015 23:42:57 GMT",
     "status": "pending",
     "description": "transfer"
@@ -201,7 +304,7 @@ def purchase(accountId, merchantId, amt):
     "merchant_id": merchantId,
     "medium": "balance",
     "purchase_date": "Sat, 07 Nov 2015 23:42:57 GMT",
-    "amount": int(amt),
+    "amount": float(amt),
     "status": "pending",
     "description": "purchase"
   }

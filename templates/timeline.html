@@ -1,14 +1,42 @@
 <!doctype html>
 <title>Flaskr</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<link href="{{url_for('static', filename='bootstrap.min.css')}}" rel="stylesheet">
+
+<!-- Custom CSS -->
+<link href="{{url_for('static', filename='agency.css')}}" rel="stylesheet">
 <div class="page">
   <h1>{{ typeOfTransaction }}</h1>
+  <ul class="timeline">
+	  {% for transaction in timeline_nodes %}
+		<li class="timeline-inverted">
+			{% if "Transfers" in typeOfTransaction%}
+				{% if transaction[1] %}
+					<div class="timeline-image" style="background-color:#FF5050">
+				{% else %}
+					<div class="timeline-image" style="background-color:#009933">
+				{% endif %}
+					<br/><h4>${{transaction[0]['amount']}}<br/>
+					</div>
+					<div class="timeline-panel" style="padding-left:60px; padding-right:6px; padding-top:60px">
+					{{transaction[0]['transaction_date']}}
+					</div>
+			{% else %}
+				<div class="timeline-image">
+				<br/><h4>${{transaction['amount']}}<br/>
+				</div>
+				<div class="timeline-panel" style="padding-left:60px; padding-right:6px; padding-top:60px">
+				{% if transaction['transaction_date'] %}
+				{{transaction['transaction_date']}}
+				{% else %}
+				{{transaction['purchase_date']}}
+				{% endif %}
+				</div>
+			{% endif %}
+			
+		</li>
+	  {% endfor %}
+		
+	</ul>
   
-  {% for transaction in timeline_nodes %}
-	<div>
-    
-		{{ transaction }}
-	
-	</div>
-  {% endfor %}
 </div>
