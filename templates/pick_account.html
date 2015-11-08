@@ -1,0 +1,14 @@
+<!doctype html>
+<title>Flaskr</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+  <h1>Which account would you like to access?</h1>
+  
+  {% for account in accounts %}
+	<div>
+    <a href="{{ url_for("view_transactions", account_id=account["_id"]) }}">
+		{{ account["nickname"] }} ({{ account["type"] }})
+	</a>
+	</div>
+  {% endfor %}
+</div>

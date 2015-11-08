@@ -1,0 +1,14 @@
+<!doctype html>
+<title>Flaskr</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+  <h1>Which Customer are You?</h1>
+  
+  {% for customer in customers %}
+	<div>
+    <a href="{{ url_for("pick_account", customer_id=customer["_id"]) }}">
+		{{ customer["first_name"] }} {{ customer["last_name"] }}
+	</a>
+	</div>
+  {% endfor %}
+</div>
