@@ -1,0 +1,112 @@
+# This is written for PYTHON 3
+# Don't forget to install requests package
+
+import requests
+import json
+import math
+import random
+
+apiKey = '6af9b1f2823897f75471935f92d95058'
+
+def getAllCustomerIDs():
+  url = 'http://api.reimaginebanking.com/customers/?key={}'.format(apiKey)
+  response = requests.get(url)
+  customers = json.loads(response.text)
+  customer_ids = []
+  for i in customers:
+    customer_ids.append(i['_id'])
+  return customer_ids
+
+def getMerchants():
+  url = 'http://api.reimaginebanking.com/merchants/?key={}'.format(apiKey)
+  response = requests.get(url)
+  merchants = json.loads(response.text)
+  merchant_ids = []
+  for i in merchants:
+    merchants_ids.append(i['_id'])
+  return merchants_ids
+
+def getAllAccounts(customerID):
+  url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerID, apiKey)
+  response = requests.get(url)
+  accounts = json.loads(response.text)
+  account_ids = []
+  for i in accounts:
+    account_ids.append(i['_id'])
+  return account_ids
+
+def getAllAccountIDs():
+        customer_ids = getAllCustomerIDs()
+        AllAccountIDs = []
+        for i in customer_ids:
+                AllAccountIDs.append(getAllAccounts(i))
+        return AllAccountIDs
+
+# Creates random deposits
+def makeRandomDeposits():
+        apiKey = '6af9b1f2823897f75471935f92d95058'
+        account_ids = getAllAccountIDs()
+        for i in account_ids:
+                print('TEST1')
+                numdeposits = random.randint(5,20)
+                for j in range (1,numdeposits):
+                        print('TEST2')
+                        DepositURL = 'http://api.reimaginebanking.com/accounts/()/deposits?key=()'.format(i,apiKey)
+                        DepositAmount = random.randint(100,1000)
+                        payload = {
+                          "medium": "balance",
+                          "transaction_date": "7/23/2013",
+                          "status": "executed",
+                          "amount": DepositAmount,
+                          "description": "description"
+                        }
+                        response = requests.post(
+                                DepositURL,
+                                data=json.dumps(payload),
+                                headers={'content-type':'application/json'},
+                                )
+                        if response.status_code == 201:
+                                print('deposit created')
+
+myid = '563ea7b5c5be5d0f003c17c3'                       
+DepositURL = 'http://api.reimaginebanking.com/accounts/()/deposits?key=()'.format(myid,apiKey)
+DepositAmount = 500
+payload = {
+"medium": "balance",
+"transaction_date": "7/23/2013",
+"status": "executed",
+"amount": DepositAmount,
+"description": "description"
+}
+response = requests.post(
+DepositURL,
+data=json.dumps(payload),
+headers={'content-type':'application/json'},
+)
+print(response)
+if response.status_code == 404:
+        print('deposit created')
+
+makeRandomDeposits()
+
+
+
+customerId = '563ea101c5be5d0f003c17c1'
+apiKey = '6af9b1f2823897f75471935f92d95058'
+
+url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId,apiKey)
+payload = {
+  "type": "Savings",
+  "nickname": "test",
+  "rewards": 10000,
+  "balance": 10000,	
+}
+# Create a Savings Account
+response = requests.post( 
+	url, 
+	data=json.dumps(payload),
+	headers={'content-type':'application/json'},
+	)
+
+if response.status_code == 201:
+	print('account created')
