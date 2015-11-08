@@ -5,11 +5,22 @@ import requests
 import json
 import random
 
-apiKey = '6af9b1f2823897f75471935f92d95058'
+apiKey = '0226964475d9a0695aa8f53651d43589'
 
 from flask import Flask, render_template, url_for
 app = Flask(__name__)
-
+@app.route("/delete_transfers")
+def deleteTransfers():
+  for i in getAllCustomerIDs():
+    for j in getAllAccountIDs(i):
+      switch = False
+      for k in getAllTransfers(j):
+        if switch:
+          url = 'http://api.reimaginebanking.com/transfers/{}?key={}'.format(k["_id"], apiKey)
+          response = requests.delete(url)
+        else:
+          switch = True
+  return "done"
 @app.route("/populate")
 def populate():
   counter = 0
@@ -18,13 +29,13 @@ def populate():
     counter+=1
     
     #withdrawals
-    for j in range(random.randint(3,6)):
+    for j in range(random.randint(2,5)):
       make_withdrawal(i["_id"], random.randint(50, 300))
-    for j in range(random.randint(3,6)):
+    for j in range(random.randint(2,5)):
       make_deposit(i["_id"], random.randint(50, 300))
     for j in getAllAccounts():
       if i != j:
-        for k in range(random.randint(0,6)):
+        for k in range(random.randint(0,3)):
           transfer(i["_id"], j["_id"], random.randint(20, 1000))
     
     merchants = getAllMerchants()
@@ -36,11 +47,6 @@ def populate():
   
 @app.route("/html")
 def show_html():
-  return render_template('index.html')
-
-@app.route("/top10data")
-def top10data():
-  data = {"name": "Purchases", "page": "#", "children": []}
   return render_template('index.html')
   
 @app.route("/")
@@ -90,15 +96,18 @@ def purchases_json(account_id):
   for i in purchases:
     top_purchases.append([i, purchases[i]])
   sorted(top_purchases, key=lambda purchase: purchase[1], reverse=True)
-  
+  print("~~~~~~~~~~~~~~~~")
+  print(top_purchases)
   total = 0
   for i in top_purchases[10:]:
     total += i[1]
   if total != 0:
     top_purchases = top_purchases[:10]
-    top_purchases.append(['Other', total])
+    top_purchases.append(['OTHER', total])
+  print("~~~~~~~~~~~~~~~~")
+  print(top_purchases)
   for i in range(len(top_purchases)):
-    if top_purchases[i][0] == 'Other':
+    if top_purchases[i][0] == 'OTHER':
       break
     else:
       top_purchases[i].append(top_purchases[i][0])
@@ -106,9 +115,11 @@ def purchases_json(account_id):
      
   data = {"name": "Purchases", "page": url_for('view_transactions', account_id = account_id), "children": [], "amount":getPurchaseTotal(account_id)}
   for i in top_purchases:
-    if i[0] != 'Other':
+    if i[0] != 'OTHER':
       print(i)
       data["children"].append({"name": i[0], "size":30000, "amount":i[1], "page":url_for('specific_purchases_page', account_id=account_id, merchant_id=i[2])})
+    else:
+      data["children"].append({"name": i[0], "size":30000, "amount":i[1], "page":"#"})
   print(data)
   return json.dumps(data)
 
@@ -126,7 +137,8 @@ def transfers_json(account_id):
     else:
       amount = i["amount"]
       other_id = getCustomerIdByAccount(i["payer_id"])
-      
+    if other_id == None:
+      continue
     if other_id in transfers:
       transfers[other_id] += amount
     else:
@@ -149,7 +161,7 @@ def transfers_json(account_id):
     else:
       top_transfers[i].append(top_transfers[i][0])
       top_transfers[i][0] = getCustomerName(top_transfers[i][0])
-  data = {"name": "Transfers", "page": "#", "children": [], "amount":getTransferTotal(account_id)}
+  data = {"name": "Transfers", "page": url_for('specific_transfers_page', account_id=account_id, customer_id=getCustomerIdByAccount(account_id)), "children": [], "amount":getTransferTotal(account_id)}
   for i in top_transfers:
     if i[0] != 'Other':
       print(i)
@@ -443,6 +455,9 @@ def getCustomerIdByAccount(accountID):
   url = 'http://api.reimaginebanking.com/accounts/{}/customer?key={}'.format(accountID, apiKey)
   response = requests.get(url)
   customer = json.loads(response.text)
+  print(customer)
+  if(response.status_code > 400):
+    return None
   return customer["_id"]
 def getCustomerName(customerID):
   url = 'http://api.reimaginebanking.com/customers/{}?key={}'.format(customerID, apiKey)

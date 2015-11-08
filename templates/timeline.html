@@ -30,7 +30,7 @@
 					</div>
 			{% else %}
 				
-				{% if not "Withdrawal" in typeOfTransaction%}
+				{% if not "Withdrawal" in typeOfTransaction and not "Purchase" in typeOfTransaction %}
 				<div class="timeline-image" style="background-color:#009933">
 				{% else %}
 				<div class="timeline-image" style="background-color:#a01d26">

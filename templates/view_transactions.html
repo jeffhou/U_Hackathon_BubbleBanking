@@ -173,7 +173,7 @@ function sizing(d){
   if(d.amount>100 && d.amount<2000){
 	console.log((d.amount-100)/20+40);
     return (d.amount-100)*20/1900+40;
-  }else if(d.size>=2000){
+  }else if(d.amount>=2000){
 	console.log(60);
     return 60;
   }
