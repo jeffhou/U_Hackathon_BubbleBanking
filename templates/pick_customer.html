@@ -1,14 +1,24 @@
 <!doctype html>
 <title>Flaskr</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-<div class="page">
-  <h1>Which Customer are You?</h1>
-  
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<div class="page" style="background:black; padding:20px">
+	<div style="text-align:center">
+	<img src="http://www.capitalone.io/assets/img/big_logo.png" style="width:20%">
+	
+  <h1 style="color:white;margin-top:15px;font-family:CALIBRI LIGHT;">MOCK AUTHENTIFICATION</h1>
+  </div>
+  <div style="margin-bottom:15px;margin-top:20px">
   {% for customer in customers %}
-	<div>
-    <a href="{{ url_for("pick_account", customer_id=customer["_id"]) }}">
+	<div style="text-align:center">
+    <a class = "btn btn-primary" href="{{ url_for("pick_account", customer_id=customer["_id"]) }}" style="margin:7px; background-color: #a01d26; border-color: #a01d26">
 		{{ customer["first_name"] }} {{ customer["last_name"] }}
 	</a>
 	</div>
   {% endfor %}
+  </div>
 </div>

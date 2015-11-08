@@ -43,12 +43,12 @@ def view_transactions(account_id):
 @app.route("/accountJSON/<account_id>")
 def account_json(account_id):
   data = {
-      "name": "Welcome, " + getCustomerNameByAccount(account_id) + "!", "page": "#", "x": 500, "y": 250, 
+      "name": getCustomerNameByAccount(account_id).split()[0], "page": "#", "x": 500, "y": 250, "amount":getAccountBalance(account_id),
       "children": [
-      {"name": "Purchases", "size":50000, "x": 500, "y":590, "page": url_for('purchases_page', account_id=account_id)},
-      {"name": "Transfers", "size": 200,"x": 900, "y":325, "page": url_for('transfers_page', account_id=account_id)},
-      {"name": "Withdrawals", "size": 1000,"x": 500, "y":130, "page": url_for('withdrawals_page', account_id=account_id)},
-      {"name": "Deposits", "size": 200, "x": 100, "y":325, "page": url_for('deposits_page', account_id=account_id)}
+      {"name": "Purchases", "size":50000, "x": 500, "y":590, "page": url_for('purchases_page', account_id=account_id), "amount":getPurchaseTotal(account_id)},
+      {"name": "Transfers", "size": 200,"x": 900, "y":325, "page": url_for('transfers_page', account_id=account_id), "amount":getTransferTotal(account_id)},
+      {"name": "Withdrawals", "size": 1000,"x": 500, "y":130, "page": url_for('withdrawals_page', account_id=account_id), "amount":getWithdrawalTotal(account_id)},
+      {"name": "Deposits", "size": 200, "x": 100, "y":325, "page": url_for('deposits_page', account_id=account_id), "amount":getDepositTotal(account_id)}
       ]
       }
       #transactions=getAllTransactionsForAccount(account_id), purchaseTotal=getPurchaseTotal(account_id), depositTotal=getDepositTotal(account_id), transferTotal=getTransferTotal(account_id), withdrawal=getWithdrawalTotal(account_id)
@@ -395,7 +395,11 @@ def getMerchantName(merchantID):
   response = requests.get(url)
   merchant = json.loads(response.text)
   return merchant["name"]
-
+def getAccountBalance(accountID):
+  url = 'http://api.reimaginebanking.com/accounts/{}?key={}'.format(accountID, apiKey)
+  response = requests.get(url)
+  account = json.loads(response.text)
+  return account["balance"]
 def getCustomerNameByAccount(accountID):
   url = 'http://api.reimaginebanking.com/accounts/{}/customer?key={}'.format(accountID, apiKey)
   response = requests.get(url)
