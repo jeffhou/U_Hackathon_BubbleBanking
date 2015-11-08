@@ -1,0 +1,11 @@
+{
+ "name": "User",
+ "children": [
+  {
+   {"name": "Purchases", "size": 3938},
+   {"name": "Transfers", "size": 3938},
+   {"name": "Deposits", "size": 3938},
+   {"name": "Withdrawals", "size": 3938},
+   } 
+ ]
+}
