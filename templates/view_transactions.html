@@ -23,6 +23,7 @@ line.link {
 body{ margin: 2em auto; width: 700px; border: 5px solid #ccc;
     background: white; }
 .page{background:black}
+
 </style>
 <body style="text-align:center">
 <div class="page">
@@ -48,15 +49,14 @@ var svg = d3.select(".page").append("svg")
 
 var link = svg.selectAll(".link"),
     node = svg.selectAll(".node");
-
+	
 d3.json("{{ url_for('account_json', account_id=account_id) }}", function(error, json) {
   if (error) throw error;
 
   root = json;
   root.fixed=true;
   root.x=width/2;
-  root.y=height/2-3; 
-  root
+  root.y=height/2-3;
   update();
 });
 
@@ -91,7 +91,7 @@ function update() {
       
 
   nodeEnter.append("circle")
-      .attr("r", function(d) { return 40; });
+      .attr("r", sizing);
       // .attr("cx", function(d) {return d.x})
       // .attr("cy", function(d) {return d.y});
   nodeEnter.append("text")
@@ -139,7 +139,7 @@ function mouseover(d) {
 	d3.select(this).select('circle')
           .transition()
           .duration(300)
-          .attr("r", function(d){return 45;})
+          .attr("r", function(d){return sizing(d)+5;})
 }
 function mouseout(d) {  
          d3.select(this).select('text')
@@ -152,7 +152,7 @@ function mouseout(d) {
         d3.select(this).select('circle')
           .transition()
           .duration(300)
-          .attr("r", function(d){return 40;});
+          .attr("r", sizing);
            
   }
 
@@ -169,5 +169,21 @@ function flatten(root) {
   recurse(root);
   return nodes;
 }
+function sizing(d){
+  if(d.amount>100 && d.amount<2000){
+	console.log((d.amount-100)/40+40);
+    return (d.amount-100)/40+40;
+  }
+  else if(d.size>=2000){
+	console.log(80);
+    return 80;
+  }
+  else {
+	console.log(40);
+    return 40;
+  }
+}
+
 
 </script>
+</body>

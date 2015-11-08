@@ -461,6 +461,7 @@ section h3.section-subheading {
 }
 
 .timeline>li .timeline-panel {
+	color:white;
     float: right;
     position: relative;
     width: 100%;
@@ -493,7 +494,7 @@ section h3.section-subheading {
     border-radius: 100%;
     text-align: center;
     color: #fff;
-    background-color: #3182bd;
+    background-color: #a01d26;
 }
 
 .timeline>li .timeline-image h4 {

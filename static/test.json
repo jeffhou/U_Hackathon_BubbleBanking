@@ -1,0 +1,9 @@
+{
+"name": "WELCOME! USER", "page": "#", "x": 500, "y": 250, 
+"children": [
+{"name": "PURCHASES", "size":50000, "x": 500, "y":590, "page": "http://facebook.com"},
+{"name": "TRANSFERS", "size": 200,"x": 900, "y":325, "page": "http://yahoo.com"},
+{"name": "WITHDRAWALS", "size": 1000,"x": 500, "y":130, "page": "http://bing.com"},
+{"name": "DEPOSITS", "size": 200, "x": 100, "y":325, "page": "http://google.com"}
+]
+}

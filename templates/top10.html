@@ -4,53 +4,53 @@
 
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 <style>
-
 .node circle {
   cursor: pointer;
-  stroke: #3182bd;
+  stroke: #fff;
   stroke-width: 1.5px;
 }
 
 .node text {
-  font: 20px georgia;
+  font: 13px georgia;
+  color: white;
   pointer-events: none;
   text-anchor: middle;
 }
 
 line.link {
   fill: none;
-  stroke: #9ecae1;
+  stroke: #fff;
   stroke-width: 10 px;
 }
-
+body{ margin: 2em auto; width: 700px; border: 5px solid #ccc;
+    background: white; }
+.page{background:black}
 </style>
 
 
 
-<body>	
-
+<body style="text-align:center">
+<div class="page">
+</div>
 
 
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 
-var width = 1200,
-    height = 700,
+var width = 574,
+    height = 450,
     root;
 
 var force = d3.layout.force()
-    .linkDistance(250)
+    .linkDistance(160)
     .charge(-1000)
     .gravity(0)
     .size([width, height])
     .on("tick", tick);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select(".page").append("svg")
     .attr("width", width)
     .attr("height", height);
-d3.select("svg").style("position", "absolute")
-	.style("left", 0)
-	.style("top", 0);
 
 var link = svg.selectAll(".link"),
     node = svg.selectAll(".node");
@@ -94,14 +94,17 @@ function update() {
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
       .on("click", click)
+	  .on("mouseover", mouseover)
+	  .on("mouseout", mouseout);
       
 
   nodeEnter.append("circle")
-      .attr("r", function(d) { return 65; });
+      .attr("r", sizing);
        // .attr("cx", function(d) {return d.x})
        // .attr("cy", function(d) {return d.y});
   nodeEnter.append("text")
       .attr("dy", ".35em")
+	  .style("fill", color2)
       .text(function(d) { return d.name; });
 
   node.select("circle")
@@ -118,16 +121,46 @@ function tick() {
 }
 
 function color(d) {
-  return d._children ? "#3182bd" // collapsed package
-      : d.children ? "#c6dbef" // expanded package
-      : "#fd8d3c"; // leaf node
+  return d._children ? "#a01d26" // collapsed package
+      : d.children ? "#fff" // expanded package
+      : "#a01d26"; // leaf node
 }
-
+function color2(d){
+	  return d._children ? "#fff" // collapsed package
+      : d.children ? "#000" // expanded package
+      : "#fff"; // leaf node
+}
 // Toggle children on click.
 function click(d) {
   window.location=d.page;
 }
-
+function mouseover(d) {
+	d3.select(this).select('text')
+	   .transition()
+	   .duration(300)
+	   .text(function(d){
+		   return "$" + d.amount;
+		 })
+	   .style("font-size","13px");
+	d3.select(this).select('circle')
+          .transition()
+          .duration(300)
+          .attr("r", function(d){return sizing(d)+5;})
+}
+function mouseout(d) {  
+         d3.select(this).select('text')
+           .transition()
+           .duration(300)
+           .text(function(d){
+               return d.name;
+             })
+           .style("font-size","13px")
+        d3.select(this).select('circle')
+          .transition()
+          .duration(300)
+          .attr("r", sizing);
+           
+  }
 // Returns a list of all nodes under the root.
 function flatten(root) {
   var nodes = [], i = 0;
@@ -140,6 +173,20 @@ function flatten(root) {
 
   recurse(root);
   return nodes;
+}
+function sizing(d){
+  if(d.amount>100 && d.amount<2000){
+	console.log((d.amount-100)/40+40);
+    return (d.amount-100)/40+40;
+  }
+  else if(d.amount<=100){
+	console.log(40);
+    return 40;
+  }
+  else if(d.size>=2000){
+	console.log(80);
+    return 80;
+  }
 }
 
 </script>

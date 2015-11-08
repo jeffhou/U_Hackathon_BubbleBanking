@@ -1,30 +1,43 @@
 <!doctype html>
 <title>Flaskr</title>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-<link href="{{url_for('static', filename='bootstrap.min.css')}}" rel="stylesheet">
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 <!-- Custom CSS -->
 <link href="{{url_for('static', filename='agency.css')}}" rel="stylesheet">
-<div class="page">
-  <h1>{{ typeOfTransaction }}</h1>
-  <ul class="timeline">
+<div class="page" style="background:black; padding:20px">
+  <div style="text-align:center">
+	<img src="http://www.capitalone.io/assets/img/big_logo.png" style="width:20%">
+	
+  <h1 style="color:white;margin-top:15px;font-family:CALIBRI LIGHT;">{{typeOfTransaction.upper()}}</h1>
+  </div>
+  <ul class="timeline" style="margin-top:30px">
 	  {% for transaction in timeline_nodes %}
 		<li class="timeline-inverted">
 			{% if "Transfers" in typeOfTransaction%}
 				{% if transaction[1] %}
-					<div class="timeline-image" style="background-color:#FF5050">
+					<div class="timeline-image" style="background-color:#a01d26">
 				{% else %}
 					<div class="timeline-image" style="background-color:#009933">
 				{% endif %}
-					<br/><h4>${{transaction[0]['amount']}}<br/>
+					<div style="font-size:23px"><br /><br />${{transaction[0]['amount']}}</div>
 					</div>
 					<div class="timeline-panel" style="padding-left:60px; padding-right:6px; padding-top:60px">
 					{{transaction[0]['transaction_date']}}
 					</div>
 			{% else %}
-				<div class="timeline-image">
-				<br/><h4>${{transaction['amount']}}<br/>
+				
+				{% if not "Withdrawal" in typeOfTransaction%}
+				<div class="timeline-image" style="background-color:#009933">
+				{% else %}
+				<div class="timeline-image" style="background-color:#a01d26">
+				{% endif %}
+				<div style="font-size:23px"><br /><br />${{transaction['amount']}}</div>
 				</div>
+				
 				<div class="timeline-panel" style="padding-left:60px; padding-right:6px; padding-top:60px">
 				{% if transaction['transaction_date'] %}
 				{{transaction['transaction_date']}}
@@ -38,5 +51,9 @@
 	  {% endfor %}
 		
 	</ul>
-  
+	<div style="text-align:center;margin-top:40px">
+    <a class = "btn btn-primary" href="{{ url }}" style="margin:7px; background-color: #a01d26; border-color: #a01d26">
+		Back 
+	</a>
+	</div>
 </div>
