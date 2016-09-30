@@ -1,6 +1,9 @@
-# bankbubblegraph
+# Bubble Banking
 Bank Statement Reinvented through Data Visualization
 
+Project hacked together for HackDuke 2015
+
+Technologies Used: Flask, Python 3.5, D3.js, Capital One API (api.reimaginebanking.com)
 
 Goals & Features
 
